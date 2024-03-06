@@ -17,6 +17,7 @@ pub const SEQUENCE_LEN: usize = 4;
 pub enum Message {
     HashBlock(BlockHash, u32),
     HashTx(Txid, u32),
+    HashWTx(Txid, String, u32),
     Block(Block, u32),
     Tx(Transaction, u32),
     Sequence(SequenceMessage, u32),
@@ -35,6 +36,7 @@ impl Message {
         let topic = match self {
             Self::HashBlock(..) => "hashblock",
             Self::HashTx(..) => "hashtx",
+            Self::HashWTx(..) => "hashwtx",
             Self::Block(..) => "rawblock",
             Self::Tx(..) => "rawtx",
             Self::Sequence(..) => "sequence",
@@ -49,10 +51,31 @@ impl Message {
     #[inline]
     pub fn serialize_data_to_vec(&self) -> Vec<u8> {
         match self {
-            Self::HashBlock(_, _) | Self::HashTx(_, _) => {
+            Self::HashBlock(_, _) | Self::HashTx(_, _) | Self::HashWTx(_, _, _) => {
                 let mut arr = match self {
                     Self::HashBlock(blockhash, _) => blockhash.to_byte_array(),
                     Self::HashTx(txid, _) => txid.to_byte_array(),
+                    Self::HashWTx(txid, wallet, _) => {
+                        let mut arr = txid.to_byte_array();
+                        arr.reverse();
+
+                        // Convert wallet string to bytes
+                        let wallet_bytes = wallet.as_bytes();
+
+                        // Check if wallet_bytes is less than 32 bytes and pad with zeros if necessary
+                        let mut padded_wallet: [u8; 32] = [0; 32];
+                        padded_wallet[..wallet_bytes.len()].copy_from_slice(wallet_bytes);
+
+                        // Concatenate the arrays
+                        let mut result = Vec::new();
+                        result.extend_from_slice(&arr);
+                        result.extend_from_slice(&padded_wallet);
+
+                        // Convert Vec<u8> to [u8; 32]
+                        result.try_into().unwrap_or_else(|v: Vec<u8>| {
+                            panic!("Expected Vec<u8> with length 32, found length {}", v.len())
+                        })
+                    }
                     _ => unreachable!(),
                 };
                 arr.reverse();
@@ -81,6 +104,7 @@ impl Message {
         match self {
             Self::HashBlock(_, seq)
             | Self::HashTx(_, seq)
+            | Self::HashWTx(_, _, seq)
             | Self::Block(_, seq)
             | Self::Tx(_, seq)
             | Self::Sequence(_, seq) => *seq,
@@ -130,6 +154,20 @@ impl Message {
             b"rawblock" => Self::Block(deserialize(data)?, seq),
             b"rawtx" => Self::Tx(deserialize(data)?, seq),
             b"sequence" => Self::Sequence(SequenceMessage::from_byte_slice(data)?, seq),
+            b"hashwtx" => {
+                let txid_bytes = data[..32]
+                    .try_into()
+                    .map_err(|_| Error::Invalid256BitHashLength(data.len()))?;
+                let wallet_bytes = data[32..].to_vec();
+                let mut txid = Txid::from_byte_array(txid_bytes);
+                txid;
+
+                Self::HashWTx(
+                    txid,
+                    String::from_utf8_lossy(&wallet_bytes).into_owned(),
+                    seq,
+                )
+            }
             _ => {
                 let mut buf = [0; TOPIC_MAX_LEN];
 
@@ -180,6 +218,9 @@ impl fmt::Display for Message {
         match self {
             Self::HashBlock(blockhash, seq) => write!(f, "HashBlock({blockhash}, sequence={seq})"),
             Self::HashTx(txid, seq) => write!(f, "HashTx({txid}, sequence={seq})"),
+            Self::HashWTx(txid, wallet, seq) => {
+                write!(f, "HashWTx({txid}, wallet={wallet}, sequence={seq})")
+            }
             Self::Block(block, seq) => write!(f, "Block({}, sequence={seq})", block.block_hash()),
             Self::Tx(tx, seq) => write!(f, "Tx({}, sequence={seq})", tx.txid()),
             Self::Sequence(sm, seq) => write!(f, "Sequence({sm}, sequence={seq})"),
