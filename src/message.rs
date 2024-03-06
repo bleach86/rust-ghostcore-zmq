@@ -77,7 +77,6 @@ impl Message {
                     }
                     _ => unreachable!(),
                 };
-                arr.reverse();
                 arr.to_vec()
             }
             Self::Block(block, _) => serialize(&block),
