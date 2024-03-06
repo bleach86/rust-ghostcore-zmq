@@ -56,8 +56,7 @@ impl Message {
                     Self::HashBlock(blockhash, _) => blockhash.to_byte_array(),
                     Self::HashTx(txid, _) => txid.to_byte_array(),
                     Self::HashWTx(txid, wallet, _) => {
-                        let mut arr = txid.to_byte_array();
-                        arr.reverse();
+                        let arr = txid.to_byte_array();
 
                         // Convert wallet string to bytes
                         let wallet_bytes = wallet.as_bytes();
@@ -159,8 +158,8 @@ impl Message {
                     .try_into()
                     .map_err(|_| Error::Invalid256BitHashLength(data.len()))?;
                 let wallet_bytes = data[32..].to_vec();
-                let mut txid = Txid::from_byte_array(txid_bytes);
-                txid;
+                let txid = Txid::from_byte_array(txid_bytes);
+                //txid;
 
                 Self::HashWTx(
                     txid,
