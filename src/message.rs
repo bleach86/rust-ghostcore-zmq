@@ -56,7 +56,8 @@ impl Message {
                     Self::HashBlock(blockhash, _) => blockhash.to_byte_array(),
                     Self::HashTx(txid, _) => txid.to_byte_array(),
                     Self::HashWTx(txid, wallet, _) => {
-                        let inner_arr = txid.to_byte_array();
+                        let mut arr = txid.to_byte_array();
+                        arr.reverse();
 
                         // Convert wallet string to bytes
                         let wallet_bytes = wallet.as_bytes();
@@ -67,7 +68,7 @@ impl Message {
 
                         // Concatenate the arrays
                         let mut result = Vec::new();
-                        result.extend_from_slice(&inner_arr);
+                        result.extend_from_slice(&arr);
                         result.extend_from_slice(&padded_wallet);
 
                         // Convert Vec<u8> to [u8; 32]
@@ -77,7 +78,6 @@ impl Message {
                     }
                     _ => unreachable!(),
                 };
-                arr.reverse();
                 arr.to_vec()
             }
             Self::Block(block, _) => serialize(&block),
@@ -154,12 +154,12 @@ impl Message {
             b"rawtx" => Self::Tx(deserialize(data)?, seq),
             b"sequence" => Self::Sequence(SequenceMessage::from_byte_slice(data)?, seq),
             b"hashwtx" => {
-                let txid_bytes = data[..32]
+                let mut txid_bytes: [u8; 32] = data[..32]
                     .try_into()
                     .map_err(|_| Error::Invalid256BitHashLength(data.len()))?;
+                txid_bytes.reverse();
                 let wallet_bytes = data[32..].to_vec();
                 let txid = Txid::from_byte_array(txid_bytes);
-                //txid;
 
                 Self::HashWTx(
                     txid,
