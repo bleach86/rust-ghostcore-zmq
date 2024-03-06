@@ -56,7 +56,8 @@ impl Message {
                     Self::HashBlock(blockhash, _) => blockhash.to_byte_array(),
                     Self::HashTx(txid, _) => txid.to_byte_array(),
                     Self::HashWTx(txid, wallet, _) => {
-                        let arr = txid.to_byte_array();
+                        let mut arr = txid.to_byte_array();
+                        arr.reverse();
 
                         // Convert wallet string to bytes
                         let wallet_bytes = wallet.as_bytes();
