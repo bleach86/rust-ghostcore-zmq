@@ -6,7 +6,7 @@ license = "MIT"
 description = "Ghost Core ZMQ subscriber with minimal dependencies"
 homepage = "https://github.com/bleach86/rust-ghostcore-zmq"
 repository = "https://github.com/bleach86/rust-ghostcore-zmq"
-keywords = ["bitcoin", "bitcoin-core", "zmq", "Ghost Coin"]
+keywords = ["bitcoin", "bitcoin-core", "zmq", "Ghost-Coin"]
 categories = [
     "cryptography::cryptocurrencies",
     "network-programming",
