@@ -158,8 +158,8 @@ impl Message {
                     .try_into()
                     .map_err(|_| Error::Invalid256BitHashLength(data.len()))?;
                 txid_bytes.reverse();
-                let wallet_bytes = data[32..].to_vec();
-                let txid = Txid::from_byte_array(txid_bytes);
+                let wallet_bytes: Vec<u8> = data[32..].to_vec();
+                let txid: Txid = Txid::from_byte_array(txid_bytes);
 
                 Self::HashWTx(
                     txid,

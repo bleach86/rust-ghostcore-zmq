@@ -1,13 +1,17 @@
 [package]
-name = "bitcoincore-zmq"
+name = "ghostcore-zmq"
 version = "1.4.0"
 edition = "2021"
 license = "MIT"
-description = "Bitcoin Core ZMQ subscriber with minimal dependencies"
-homepage = "https://github.com/antonilol/rust-bitcoincore-zmq"
-repository = "https://github.com/antonilol/rust-bitcoincore-zmq"
-keywords = ["bitcoin", "bitcoin-core", "zmq"]
-categories = ["cryptography::cryptocurrencies", "network-programming", "asynchronous"]
+description = "Ghost Core ZMQ subscriber with minimal dependencies"
+homepage = "https://github.com/bleach86/rust-ghostcore-zmq"
+repository = "https://github.com/bleach86/rust-ghostcore-zmq"
+keywords = ["bitcoin", "bitcoin-core", "zmq", "Ghost Coin"]
+categories = [
+    "cryptography::cryptocurrencies",
+    "network-programming",
+    "asynchronous",
+]
 
 [features]
 async = ["dep:async_zmq", "dep:futures-util"]
