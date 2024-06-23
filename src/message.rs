@@ -52,7 +52,7 @@ impl Message {
     pub fn serialize_data_to_vec(&self) -> Vec<u8> {
         match self {
             Self::HashBlock(_, _) | Self::HashTx(_, _) | Self::HashWTx(_, _, _) => {
-                let mut arr = match self {
+                let arr = match self {
                     Self::HashBlock(blockhash, _) => blockhash.to_byte_array(),
                     Self::HashTx(txid, _) => txid.to_byte_array(),
                     Self::HashWTx(txid, wallet, _) => {

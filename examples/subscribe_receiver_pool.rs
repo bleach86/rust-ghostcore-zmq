@@ -1,4 +1,4 @@
-use bitcoincore_zmq::subscribe_receiver;
+use ghostcore_zmq::subscribe_receiver;
 use std::{
     sync::{Arc, Mutex},
     thread,

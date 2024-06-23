@@ -1,5 +1,5 @@
-use bitcoincore_zmq::subscribe_blocking;
 use core::ops::ControlFlow;
+use ghostcore_zmq::subscribe_blocking;
 
 fn main() {
     let callback = |msg| {
